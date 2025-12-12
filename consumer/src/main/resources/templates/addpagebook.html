@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>图书管理</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
+    <link rel="stylesheet" th:href="@{/css/AdminLTE.css}">
+    <link rel="stylesheet" th:href="@{/css/pagination.css}">
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+<head>
+    <meta charset="UTF-8">
+    <title>添加图书</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        form {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+        }
+        label {
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 5px;
+            align-self: flex-start;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>添加图书</h1>
+    <form th:action="@{addbook}" method="post">
+        <label for="name">图书名称:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="author">作者:</label>
+        <input type="text" id="author" name="author" required>
+        <label for="press">出版社:</label>
+        <input type="text" id="press" name="press" required>
+        <label for="status">状态:</label>
+        <input type="text" id="status" name="status" required>
+        <input type="submit" value="提交">
+    </form>
+</body>
+</html>
