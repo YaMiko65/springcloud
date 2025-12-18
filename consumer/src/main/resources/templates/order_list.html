@@ -1,38 +1,39 @@
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
-    <title>我的订单</title>
-    <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
-    <link rel="stylesheet" th:href="@{/css/AdminLTE.css}">
-    <script th:src="@{/js/jquery.min.js}"></script>
+    <meta charset="UTF-8">
+    <title>订单列表</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
 <body>
-<div class="box-body">
-    <div class="table-box">
-        <table id="dataList" class="table table-bordered table-striped table-hover text-center">
-            <thead>
-            <tr>
-                <th>订单号</th>
-                <th>图书ID</th>
-                <th>购买数量</th>
-                <th>单价</th>
-                <th>总金额</th>
-                <th>下单时间</th>
-            </tr>
-            </thead>
-            <tbody>
-            <th:block th:each="order : ${orders}">
+<div class="container">
+    <h2 class="page-header">订单管理系统</h2>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">订单列表</div>
+        <div class="panel-body">
+            <table class="table table-bordered table-striped">
+                <thead>
                 <tr>
-                    <td th:text="${order.id}"></td>
-                    <td th:text="${order.bookId}"></td>
-                    <td th:text="${order.count}"></td>
-                    <td th:text="${order.price}"></td>
-                    <td th:text="${order.totalPrice}"></td>
-                    <td th:text="${#dates.format(order.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <th>订单ID</th>
+                    <th>用户ID</th>
+                    <th>书籍ID</th>
+                    <th>下单时间</th>
                 </tr>
-            </th:block>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.id}"></td>
+                    <td th:text="${order.userId}"></td>
+                    <td th:text="${order.bookId}"></td>
+                    <td th:text="${order.createTime != null} ? ${#dates.format(order.createTime, 'yyyy-MM-dd HH:mm:ss')} : '无时间'"></td>                </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${#lists.isEmpty(orders)}" class="alert alert-warning">
+                当前没有订单数据。
+            </div>
+        </div>
     </div>
 </div>
 </body>
