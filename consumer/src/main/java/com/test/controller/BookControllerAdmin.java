@@ -27,33 +27,32 @@ public class BookControllerAdmin {
     }
 
     @RequestMapping("search")
-    public String searchBook(Model model,EBook book) {
+    public String searchBook(Model model, EBook book) {
         List<EBook> books = bookService.searchBook(book);
         model.addAttribute("books", books);
         return "book_manag";
     }
 
     @RequestMapping("find/{id}")
-    public String updateBook(Model model,@PathVariable("id") Integer id){
+    public String updateBook(@PathVariable("id") Integer id) {
         bookService.updateBook(id);
-        return "book_manag";
+        return "redirect:/book/admin/manag";
     }
 
     @RequestMapping("del/{id}")
-    public String deleteBook(Model model,@PathVariable("id") Integer id){
+    public String deleteBook(@PathVariable("id") Integer id) {
         bookService.delBookById(id);
-        return "book_manag";
+        return "redirect:/book/admin/manag";
     }
 
     @RequestMapping("jumpaddbook")
-    public String jumpBookAdd(){
+    public String jumpBookAdd() {
         return "addpagebook";
     }
 
     @RequestMapping("addbook")
-    public String jumpBooksAdd(EBook book){
+    public String jumpBooksAdd(EBook book) {
         bookService.addBook(book);
         return "redirect:/book/admin/manag";
     }
-
 }

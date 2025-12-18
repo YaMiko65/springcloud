@@ -3,9 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>网上图书馆</title>
-    <headers>
-        <frame-options policy="SAMEORIGIN" />
-    </headers>
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
     <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
     <link rel="stylesheet" th:href="@{/css/AdminLTE.css}">
     <link rel="stylesheet" th:href="@{/css/_all-skins.min.css}">
@@ -15,7 +13,6 @@
         function SetIFrameHeight() {
             var iframeid = document.getElementById("iframe");
             if (document.getElementById) {
-                /*设置 内容展示区的高度等于页面可视区的高度*/
                 iframeid.height = document.documentElement.clientHeight;
             }
         }
@@ -24,21 +21,17 @@
 
 <body class="hold-transition skin-green sidebar-mini">
 <div class="wrapper">
-    <!-- 页面头部 -->
     <header class="main-header">
-        <!-- Logo -->
         <a th:href="@{/}" class="logo">
             <span class="logo-lg"><b>网上图书馆</b></span>
         </a>
-        <!-- 头部导航 -->
         <nav class="navbar navbar-static-top">
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
                     <li class="dropdown user user-menu">
-                        <a  th:if="${session.user !=null}">
-                            <img th:src="@{/img/user.jpg}" class="user-image"
-                                 alt="User Image">
-                            <span class="hidden-xs" th:text="${session.user.name}"></span>
+                        <a>
+                            <img th:src="@{/img/user.jpg}" class="user-image" alt="User Image">
+                            <span class="hidden-xs" sec:authentication="name">User</span>
                         </a>
                     </li>
                     <li class="dropdown user user-menu">
@@ -50,14 +43,18 @@
             </div>
         </nav>
     </header>
-    <!-- 页面头部 /-->
-    <!-- 导航侧栏 -->
     <aside class="main-sidebar">
         <section class="sidebar">
             <ul class="sidebar-menu">
                 <li sec:authorize="hasAnyAuthority('ROLE_COMMON','ROLE_ADMIN')">
                     <a th:href="@{/book/list}" target="iframe">
                         <i class="fa fa-circle-o"></i>图书阅读
+                    </a>
+                </li>
+
+                <li sec:authorize="hasAnyAuthority('ROLE_COMMON','ROLE_ADMIN')">
+                    <a th:href="@{/consumer/order/view}" target="iframe">
+                        <i class="fa fa-circle-o"></i>我的订单
                     </a>
                 </li>
                 <li sec:authorize="hasAuthority('ROLE_ADMIN')">
@@ -67,13 +64,9 @@
                 </li>
             </ul>
         </section>
-        <!-- /.sidebar -->
     </aside>
-    <!-- 导航侧栏 /-->
-    <!-- 内容展示区域 -->
     <div class="content-wrapper">
-        <iframe width="100%" id="iframe" name="iframe" onload="SetIFrameHeight()"
-                frameborder="0" ></iframe>
+        <iframe width="100%" id="iframe" name="iframe" onload="SetIFrameHeight()" frameborder="0" ></iframe>
     </div>
 </div>
 </body>

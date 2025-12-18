@@ -19,19 +19,18 @@ public class LoginSerctiryConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http.authorizeRequests()
-                .mvcMatchers("/loginview","/css/**","/js/**","/img/**").permitAll()
+                .mvcMatchers("/loginview", "/css/**", "/js/**", "/img/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .loginPage("/loginview")
                 .loginProcessingUrl("/doLogin")
+                .defaultSuccessUrl("/", true) // 登录成功后跳转到首页
                 .and()
                 .csrf().disable()
                 .headers().frameOptions().sameOrigin();
 
         return http.build();
     }
-
 }

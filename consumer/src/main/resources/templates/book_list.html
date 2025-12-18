@@ -2,25 +2,22 @@
 <head>
     <meta charset="utf-8">
     <title>图书阅读</title>
-    <link rel="stylesheet" th>
     <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
     <link rel="stylesheet" th:href="@{/css/AdminLTE.css}">
     <script th:src="@{/js/jquery.min.js}"></script>
 </head>
 <body>
 <div class="box-body">
-    <!--数据搜索 -->
     <div class="pull-right">
         <div class="has-feedback">
             <form th:action="@{/book/search}" method="post">
-                图书名称：<input name="name">&nbsp&nbsp&nbsp&nbsp
-                图书作者：<input name="author">&nbsp&nbsp&nbsp&nbsp
+                图书名称：<input name="name">&nbsp;&nbsp;&nbsp;&nbsp;
+                图书作者：<input name="author">&nbsp;&nbsp;&nbsp;&nbsp;
                 <input class="btn btn-default" type="submit" value="查询">
             </form>
         </div>
     </div>
     <div class="table-box">
-        <!-- 数据表格 -->
         <table id="dataList" class="table table-bordered table-striped table-hover text-center">
             <thead>
             <tr>
@@ -34,28 +31,20 @@
             <tbody>
             <th:block th:each="book : ${books}">
                 <tr>
-                    <td th:text="${book.name}"/>
-                    </td>
+                    <td th:text="${book.name}"></td>
                     <td th:text="${book.author}"></td>
                     <td th:text="${book.press}"></td>
                     <td>
-                        <th:block th:if="${book.status == '0'}">
-                            可借阅
-                        </th:block>
-                        <th:block th:if="${book.status =='1'}">
-                            借阅中
-                        </th:block>
-                        <th:block th:if="${book.status =='2'}">
-                            归还中
-                        </th:block>
+                        <span th:if="${book.status == '0'}">可借阅</span>
+                        <span th:if="${book.status == '1'}">借阅中</span>
+                        <span th:if="${book.status == '2'}">归还中</span>
                     </td>
                     <td class="text-center">
-                        <button th:if="${book.status =='0'}" type="button" class="btn bg-olive btn-xs"
-                                th:onclick="findBookById([[${book.id}]]);"> 借阅
+                        <button th:if="${book.status == '0'}" type="button" class="btn bg-olive btn-xs"
+                                th:onclick="'findBookById('+${book.id}+')'"> 借阅
                         </button>
-                        <button th:if="${book.status =='1' ||book.status =='2'}" type="button"
-                                class="btn bg-olive btn-xs"
-                                disabled="true">借阅
+                        <button th:if="${book.status == '1' || book.status == '2'}" type="button"
+                                class="btn bg-olive btn-xs" disabled="disabled">借阅
                         </button>
                     </td>
                 </tr>
@@ -64,11 +53,11 @@
         </table>
     </div>
 </div>
-
-</body>
 <script>
+    // 修改为页面跳转，触发 Controller 的 redirect
     function findBookById(id) {
-        $.get("/book/find/" + id)
+        window.location.href = "/book/find/" + id;
     }
 </script>
+</body>
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="utf-8">
     <title>图书管理</title>
@@ -10,24 +11,22 @@
 </head>
 <body>
 <div class="box-body">
-    <div class="pull-left" th:if="${#session.getAttribute('user').role =='ADMIN'}">
+    <div class="pull-left" sec:authorize="hasAuthority('ROLE_ADMIN')">
         <div class="btn-group">
             <button th:onclick="'window.location.href=\''+@{jumpaddbook}+'\''" type="button" class="btn btn-default"> 新增
             </button>
         </div>
     </div>
-    <!--数据搜索 -->
     <div class="pull-right">
         <div class="has-feedback">
             <form th:action="@{/book/search}" method="post">
-                图书名称：<input name="name">&nbsp&nbsp&nbsp&nbsp
-                图书作者：<input name="author">&nbsp&nbsp&nbsp&nbsp
+                图书名称：<input name="name">&nbsp;&nbsp;&nbsp;&nbsp;
+                图书作者：<input name="author">&nbsp;&nbsp;&nbsp;&nbsp;
                 <input class="btn btn-default" type="submit" value="查询">
             </form>
         </div>
     </div>
     <div class="table-box">
-        <!-- 数据表格 -->
         <table id="dataList" class="table table-bordered table-striped table-hover text-center">
             <thead>
             <tr>
@@ -41,31 +40,23 @@
             <tbody>
             <th:block th:each="book : ${books}">
                 <tr>
-                    <td th:text="${book.name}"/>
-                    </td>
+                    <td th:text="${book.name}"></td>
                     <td th:text="${book.author}"></td>
                     <td th:text="${book.press}"></td>
                     <td>
-                        <th:block th:if="${book.status == '0'}">
-                            可借阅
-                        </th:block>
-                        <th:block th:if="${book.status =='1'}">
-                            借阅中
-                        </th:block>
-                        <th:block th:if="${book.status =='2'}">
-                            归还中
-                        </th:block>
+                        <span th:if="${book.status == '0'}">可借阅</span>
+                        <span th:if="${book.status == '1'}">借阅中</span>
+                        <span th:if="${book.status == '2'}">归还中</span>
                     </td>
                     <td class="text-center">
-                        <button th:if="${book.status =='0'}" type="button" class="btn bg-olive btn-xs"
-                                th:onclick="findBookById([[${book.id}]]);"> 借阅
+                        <button th:if="${book.status == '0'}" type="button" class="btn bg-olive btn-xs"
+                                th:onclick="'findBookById('+${book.id}+')'"> 借阅
                         </button>
-                        <button th:if="${book.status =='1' ||book.status =='2'}" type="button"
-                                class="btn bg-olive btn-xs"
-                                disabled="true">借阅
+                        <button th:if="${book.status == '1' || book.status == '2'}" type="button"
+                                class="btn bg-olive btn-xs" disabled="disabled">借阅
                         </button>
-                        <button th:if="${#session.getAttribute('user').role =='ADMIN'}" type="button" class="btn bg-olive btn-xs"
-                                th:onclick="delBookById([[${book.id}]]);"> 删除
+                        <button sec:authorize="hasAuthority('ROLE_ADMIN')" type="button" class="btn bg-olive btn-xs"
+                                th:onclick="'delBookById('+${book.id}+')'"> 删除
                         </button>
                     </td>
                 </tr>
@@ -74,14 +65,13 @@
         </table>
     </div>
 </div>
-
-</body>
 <script>
     function findBookById(id) {
-        $.get("/book/find/" + id)
+        window.location.href = "/book/find/" + id;
     }
     function delBookById(id) {
-        $.get("/book/del/" + id)
+        window.location.href = "/book/del/" + id;
     }
 </script>
+</body>
 </html>
