@@ -9,7 +9,9 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -21,22 +23,16 @@ public class BookControllerAdmin {
     private BookService bookService;
 
     @Autowired
-    private RemoteInventoryService inventoryService; // 注入库存服务
+    private RemoteInventoryService inventoryService;
 
-    // --- 辅助方法：填充库存信息 ---
+    // 辅助方法：填充库存
     private void populateStock(List<EBook> books) {
-        if (books == null || books.isEmpty()) return;
-
+        if (books == null) return;
         for (EBook book : books) {
             try {
                 Inventory inv = inventoryService.getStockByBookId(book.getId());
-                if (inv != null && inv.getStock() != null) {
-                    book.setStock(inv.getStock());
-                } else {
-                    book.setStock(0);
-                }
+                book.setStock(inv != null && inv.getStock() != null ? inv.getStock() : 0);
             } catch (Exception e) {
-                System.err.println("查询库存失败 bookId=" + book.getId() + ": " + e.getMessage());
                 book.setStock(0);
             }
         }
@@ -46,7 +42,7 @@ public class BookControllerAdmin {
     @Secured("ROLE_ADMIN")
     public String findAllBooks(Model model) {
         List<EBook> books = bookService.findAllBooks();
-        populateStock(books); // 填充库存
+        populateStock(books);
         model.addAttribute("books", books);
         return "book_manag";
     }
@@ -54,31 +50,59 @@ public class BookControllerAdmin {
     @RequestMapping("search")
     public String searchBook(Model model, EBook book) {
         List<EBook> books = bookService.searchBook(book);
-        populateStock(books); // 填充库存
+        populateStock(books);
         model.addAttribute("books", books);
         return "book_manag";
     }
 
-    @RequestMapping("find/{id}")
-    public String updateBook(@PathVariable("id") Integer id) {
-        bookService.updateBook(id);
+    // 跳转添加页面
+    @RequestMapping("jumpaddbook")
+    public String jumpBookAdd(Model model) {
+        model.addAttribute("book", new EBook()); // 传空对象
+        return "addpagebook";
+    }
+
+    // [新增] 跳转编辑页面
+    @RequestMapping("jumpedit/{id}")
+    public String jumpBookEdit(@PathVariable("id") Integer id, Model model) {
+        EBook book = bookService.getBookById(id);
+        // 获取库存并设置到 book 对象中，以便在页面显示
+        Inventory inv = inventoryService.getStockByBookId(id);
+        if (inv != null) {
+            book.setStock(inv.getStock());
+        }
+        model.addAttribute("book", book);
+        return "addpagebook"; // 复用添加页面
+    }
+
+    // [修改] 统一保存接口（处理添加和修改）
+    @PostMapping("savebook")
+    public String saveBook(EBook book, @RequestParam(value = "stock", defaultValue = "0") Integer stock) {
+        if (book.getId() == null) {
+            // 新增
+            EBook savedBook = bookService.addBook(book);
+            if (savedBook != null && savedBook.getId() != null) {
+                // 保存库存
+                Inventory inv = new Inventory();
+                inv.setBookId(savedBook.getId());
+                inv.setStock(stock);
+                inventoryService.saveStock(inv);
+            }
+        } else {
+            // 修改
+            bookService.updateBookInfo(book);
+            // 更新库存
+            Inventory inv = new Inventory();
+            inv.setBookId(book.getId());
+            inv.setStock(stock);
+            inventoryService.saveStock(inv);
+        }
         return "redirect:/book/admin/manag";
     }
 
     @RequestMapping("del/{id}")
     public String deleteBook(@PathVariable("id") Integer id) {
         bookService.delBookById(id);
-        return "redirect:/book/admin/manag";
-    }
-
-    @RequestMapping("jumpaddbook")
-    public String jumpBookAdd() {
-        return "addpagebook";
-    }
-
-    @RequestMapping("addbook")
-    public String jumpBooksAdd(EBook book) {
-        bookService.addBook(book);
         return "redirect:/book/admin/manag";
     }
 }

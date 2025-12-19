@@ -23,13 +23,12 @@ public class BookController {
         return bookService.searchBooks(books);
     }
 
-    // [新增] 获取单本图书详情，用于计算价格
     @RequestMapping("/get/{id}")
     public EBook getBookById(@PathVariable("id") Integer id) {
         return bookService.getById(id);
     }
 
-    // [重构] 通用状态修改接口 (借阅传1，购买传3)
+    // 修改状态
     @RequestMapping("/status/{id}/{status}")
     public Boolean updateBookStatus(@PathVariable("id") Integer id, @PathVariable("status") String status){
         EBook eBook = bookService.getById(id);
@@ -40,10 +39,10 @@ public class BookController {
         return false;
     }
 
-    // [保留/兼容] 旧的借阅接口，现在重定向到新的状态接口逻辑
-    @RequestMapping("/find/{id}")
-    public Boolean updateBook(@PathVariable("id") Integer id){
-        return updateBookStatus(id, "1");
+    // [新增] 全量更新图书信息 (用于编辑)
+    @PostMapping("/updateInfo")
+    public Boolean updateBookInfo(@RequestBody EBook book) {
+        return bookService.updateById(book);
     }
 
     @RequestMapping("/del/{id}")
@@ -51,8 +50,10 @@ public class BookController {
         bookService.removeById(id);
     }
 
-    @RequestMapping("/addbook")
-    public void addBook(@RequestBody EBook book){
+    // [修改] 返回 EBook 以便获取生成的 ID
+    @PostMapping("/addbook")
+    public EBook addBook(@RequestBody EBook book){
         bookService.save(book);
+        return book;
     }
 }

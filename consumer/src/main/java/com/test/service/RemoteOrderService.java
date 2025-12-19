@@ -9,12 +9,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-// [修改] 指向网关
 @FeignClient(value = "orderProvider", url = "http://localhost:9527")
 public interface RemoteOrderService {
 
     @GetMapping("/order/list")
     List<Order> getAllOrders();
+
+    // [新增]
+    @GetMapping("/order/user/{userId}")
+    List<Order> getOrdersByUserId(@PathVariable("userId") Long userId);
 
     @GetMapping("/order/{id}")
     Order getOrderById(@PathVariable("id") Long id);
