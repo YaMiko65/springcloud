@@ -8,6 +8,7 @@ import com.test.service.LoginService;
 import com.test.service.RemoteOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -31,22 +33,40 @@ public class ConsumerOrderController {
     @Autowired
     private BookService bookService;
 
-    // [修改] 查看当前登录用户的订单列表
+    // 查看订单列表 (根据权限区分)
     @GetMapping("/view")
     public String viewOrders(Model model) {
-        // 1. 获取当前用户
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/loginview";
         }
-        String username = authentication.getName();
-        UserDto user = loginService.getUserByUsername(username);
 
-        if (user != null) {
-            // 2. 只查询该用户的订单
-            List<Order> orders = remoteOrderService.getOrdersByUserId(Long.valueOf(user.getId()));
-            model.addAttribute("orders", orders);
+        // 判断是否为管理员
+        boolean isAdmin = false;
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        for (GrantedAuthority authority : authorities) {
+            if ("ROLE_ADMIN".equals(authority.getAuthority())) {
+                isAdmin = true;
+                break;
+            }
         }
+
+        List<Order> orders;
+        if (isAdmin) {
+            // 1. 管理员查看所有订单
+            orders = remoteOrderService.getAllOrders();
+        } else {
+            // 2. 普通用户只看自己的订单
+            String username = authentication.getName();
+            UserDto user = loginService.getUserByUsername(username);
+            if (user != null) {
+                orders = remoteOrderService.getOrdersByUserId(Long.valueOf(user.getId()));
+            } else {
+                return "redirect:/loginview";
+            }
+        }
+
+        model.addAttribute("orders", orders);
         return "order_list";
     }
 
@@ -64,6 +84,7 @@ public class ConsumerOrderController {
         }
 
         EBook book = bookService.getBookById(bookId.intValue());
+
         if (book == null || !"0".equals(book.getStatus())) {
             return "redirect:/book/list";
         }

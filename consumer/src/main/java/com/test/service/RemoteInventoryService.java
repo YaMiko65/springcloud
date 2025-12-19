@@ -9,11 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "inventoryProvider", url = "http://localhost:9527/inventory")
 public interface RemoteInventoryService {
-
     @GetMapping("/{bookId}")
     Inventory getStockByBookId(@PathVariable("bookId") Integer bookId);
 
-    // [新增]
     @PostMapping("/save")
     boolean saveStock(@RequestBody Inventory inventory);
 }

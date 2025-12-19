@@ -1,78 +1,61 @@
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <title>图书管理</title>
     <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
     <link rel="stylesheet" th:href="@{/css/AdminLTE.css}">
+    <link rel="stylesheet" th:href="@{/css/pagination.css}">
     <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/bootstrap.js}"></script>
 </head>
-<body>
+<body class="hold-transition skin-red sidebar-mini">
+<div class="box-header with-border">
+    <h3 class="box-title">图书管理</h3>
+</div>
 <div class="box-body">
-    <div class="pull-left" >
-        <div class="btn-group">
-            <button th:onclick="'window.location.href=\''+@{jumpaddbook}+'\''" type="button" class="btn btn-default"> 新增
-            </button>
-        </div>
-    </div>
-    <div class="pull-right">
-        <div class="has-feedback">
-            <form th:action="@{/book/admin/search}" method="post">
-                图书名称：<input name="name">&nbsp;&nbsp;&nbsp;&nbsp;
-                图书作者：<input name="author">&nbsp;&nbsp;&nbsp;&nbsp;
-                <input class="btn btn-default" type="submit" value="查询">
-            </form>
-        </div>
-    </div>
     <div class="table-box">
-        <table id="dataList" class="table table-bordered table-striped table-hover text-center">
+        <div class="pull-left">
+            <div class="form-group form-inline">
+                <div class="btn-group">
+                    <a th:href="@{/book/admin/jumpaddbook}" class="btn btn-default">新建</a>
+                </div>
+            </div>
+        </div>
+        <table id="dataList" class="table table-bordered table-striped table-hover dataTable">
             <thead>
             <tr>
-                <th>图书名称</th>
-                <th>图书作者</th>
-                <th>出版社</th>
-                <th>库存</th>
-                <th>图书状态</th>
-                <th>操作</th>
+                <th class="sorting_asc">图书ID</th>
+                <th class="sorting">图书名称</th>
+                <th class="sorting">图书作者</th>
+                <th class="sorting">出版社</th>
+                <th class="sorting">价格</th>
+                <th class="sorting">库存</th>
+                <th class="sorting">图书状态</th>
+                <th class="text-center">操作</th>
             </tr>
             </thead>
             <tbody>
-            <th:block th:each="book : ${books}">
-                <tr>
-                    <td th:text="${book.name}"></td>
-                    <td th:text="${book.author}"></td>
-                    <td th:text="${book.press}"></td>
-                    <td th:text="${book.stock}"></td>
-                    <td>
-                        <span th:if="${book.status == '0'}">可借阅</span>
-                        <span th:if="${book.status == '1'}">借阅中</span>
-                        <span th:if="${book.status == '2'}">归还中</span>
-                    </td>
-                    <td class="text-center">
-                        <button th:if="${book.status == '0'}" type="button" class="btn bg-olive btn-xs"
-                                th:onclick="'findBookById('+${book.id}+')'"> 借阅
-                        </button>
-                        <button th:if="${book.status == '1' || book.status == '2'}" type="button"
-                                class="btn bg-olive btn-xs" disabled="disabled">借阅
-                        </button>
-                        <button type="button" class="btn bg-olive btn-xs"
-                                th:onclick="'delBookById('+${book.id}+')'"> 删除
-                        </button>
-                    </td>
-                </tr>
-            </th:block>
+            <tr th:each="book:${books}">
+                <td th:text="${book.id}"></td>
+                <td th:text="${book.name}"></td>
+                <td th:text="${book.author}"></td>
+                <td th:text="${book.press}"></td>
+                <td th:text="${book.price}"></td>
+                <td th:text="${book.stock}"></td>
+                <td>
+                    <span th:if="${book.status=='0'}">正常</span>
+                    <span th:if="${book.status=='1'}">借阅中</span>
+                    <span th:if="${book.status=='3'}">已售出</span>
+                </td>
+                <td class="text-center">
+                    <a th:href="@{/book/admin/jumpedit/{id}(id=${book.id})}" class="btn btn-primary btn-xs">编辑</a>
+                    <a th:href="@{/book/admin/del/{id}(id=${book.id})}" class="btn btn-danger btn-xs">删除</a>
+                </td>
+            </tr>
             </tbody>
         </table>
     </div>
 </div>
-<script>
-    // 修改为页面跳转
-    function findBookById(id) {
-        window.location.href = "/book/admin/find/" + id;
-    }
-
-    function delBookById(id) {
-        window.location.href = "/book/admin/del/" + id;
-    }
-</script>
 </body>
 </html>

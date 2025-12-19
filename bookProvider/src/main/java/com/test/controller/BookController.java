@@ -4,7 +4,6 @@ import com.test.pojo.EBook;
 import com.test.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -14,21 +13,15 @@ public class BookController {
     private BookService bookService;
 
     @RequestMapping("/list")
-    public List<EBook> findAllBooks() {
-        return bookService.findAll();
-    }
+    public List<EBook> findAllBooks() { return bookService.findAll(); }
 
     @RequestMapping("/search")
-    public List<EBook> searchBook(@RequestBody EBook books) {
-        return bookService.searchBooks(books);
-    }
+    public List<EBook> searchBook(@RequestBody EBook books) { return bookService.searchBooks(books); }
 
     @RequestMapping("/get/{id}")
-    public EBook getBookById(@PathVariable("id") Integer id) {
-        return bookService.getById(id);
-    }
+    public EBook getBookById(@PathVariable("id") Integer id) { return bookService.getById(id); }
 
-    // 修改状态
+    // 更新状态
     @RequestMapping("/status/{id}/{status}")
     public Boolean updateBookStatus(@PathVariable("id") Integer id, @PathVariable("status") String status){
         EBook eBook = bookService.getById(id);
@@ -39,18 +32,16 @@ public class BookController {
         return false;
     }
 
-    // [新增] 全量更新图书信息 (用于编辑)
+    // [新增] 用于编辑图书所有信息
     @PostMapping("/updateInfo")
     public Boolean updateBookInfo(@RequestBody EBook book) {
         return bookService.updateById(book);
     }
 
     @RequestMapping("/del/{id}")
-    public void delBookById(@PathVariable("id") Integer id){
-        bookService.removeById(id);
-    }
+    public void delBookById(@PathVariable("id") Integer id){ bookService.removeById(id); }
 
-    // [修改] 返回 EBook 以便获取生成的 ID
+    // [修改] 返回对象以获取ID
     @PostMapping("/addbook")
     public EBook addBook(@RequestBody EBook book){
         bookService.save(book);

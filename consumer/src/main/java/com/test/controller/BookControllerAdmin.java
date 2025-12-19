@@ -55,49 +55,52 @@ public class BookControllerAdmin {
         return "book_manag";
     }
 
-    // 跳转添加页面
+    // 跳转到添加页面
     @RequestMapping("jumpaddbook")
     public String jumpBookAdd(Model model) {
-        model.addAttribute("book", new EBook()); // 传空对象
+        model.addAttribute("book", new EBook()); // 传空对象用于新增
         return "addpagebook";
     }
 
-    // [新增] 跳转编辑页面
+    // [新增] 跳转到编辑页面 (回显数据)
     @RequestMapping("jumpedit/{id}")
     public String jumpBookEdit(@PathVariable("id") Integer id, Model model) {
+        // 1. 获取图书基本信息
         EBook book = bookService.getBookById(id);
-        // 获取库存并设置到 book 对象中，以便在页面显示
+        // 2. 获取库存信息
         Inventory inv = inventoryService.getStockByBookId(id);
         if (inv != null) {
             book.setStock(inv.getStock());
+        } else {
+            book.setStock(0);
         }
         model.addAttribute("book", book);
         return "addpagebook"; // 复用添加页面
     }
 
-    // [修改] 统一保存接口（处理添加和修改）
+    // [修改] 统一保存接口 (新增/修改)
     @PostMapping("savebook")
     public String saveBook(EBook book, @RequestParam(value = "stock", defaultValue = "0") Integer stock) {
         if (book.getId() == null) {
             // 新增
             EBook savedBook = bookService.addBook(book);
             if (savedBook != null && savedBook.getId() != null) {
-                // 保存库存
-                Inventory inv = new Inventory();
-                inv.setBookId(savedBook.getId());
-                inv.setStock(stock);
-                inventoryService.saveStock(inv);
+                saveInventory(savedBook.getId(), stock);
             }
         } else {
-            // 修改
+            // 修改 (调用全量更新接口)
             bookService.updateBookInfo(book);
             // 更新库存
-            Inventory inv = new Inventory();
-            inv.setBookId(book.getId());
-            inv.setStock(stock);
-            inventoryService.saveStock(inv);
+            saveInventory(book.getId(), stock);
         }
         return "redirect:/book/admin/manag";
+    }
+
+    private void saveInventory(Integer bookId, Integer stock) {
+        Inventory inv = new Inventory();
+        inv.setBookId(bookId);
+        inv.setStock(stock);
+        inventoryService.saveStock(inv);
     }
 
     @RequestMapping("del/{id}")
