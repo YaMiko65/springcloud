@@ -9,19 +9,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-// value = "orderProvider" 对应 orderProvider 服务 application.yml 中的 spring.application.name
-@FeignClient(value = "orderProvider")
+// [修改] 指向网关
+@FeignClient(value = "orderProvider", url = "http://localhost:9527")
 public interface RemoteOrderService {
 
-    // 对应 orderProvider 中 OrderController 的 /order/list 接口
     @GetMapping("/order/list")
     List<Order> getAllOrders();
 
-    // 对应 orderProvider 中 OrderController 的 /order/{id} 接口
     @GetMapping("/order/{id}")
     Order getOrderById(@PathVariable("id") Long id);
 
-    // 对应 orderProvider 中 OrderController 的 /order/create 接口
     @PostMapping("/order/create")
     boolean createOrder(@RequestBody Order order);
 }
