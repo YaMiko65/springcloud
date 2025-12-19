@@ -33,6 +33,7 @@
                 <th>图书名称</th>
                 <th>图书作者</th>
                 <th>出版社</th>
+                <th>价格</th>
                 <th>图书状态</th>
                 <th>操作</th>
             </tr>
@@ -43,19 +44,29 @@
                     <td th:text="${book.name}"></td>
                     <td th:text="${book.author}"></td>
                     <td th:text="${book.press}"></td>
+                    <td th:text="${'￥' + (book.price != null ? book.price : '0.00')}"></td>
                     <td>
-                        <span th:if="${book.status == '0'}">可借阅</span>
-                        <span th:if="${book.status == '1'}">借阅中</span>
-                        <span th:if="${book.status == '2'}">归还中</span>
+                        <span th:if="${book.status == '0'}" class="label label-success">可借阅/购买</span>
+                        <span th:if="${book.status == '1'}" class="label label-warning">借阅中</span>
+                        <span th:if="${book.status == '2'}" class="label label-info">归还中</span>
+                        <span th:if="${book.status == '3'}" class="label label-danger">已售出</span>
                     </td>
                     <td class="text-center">
                         <button th:if="${book.status == '0'}" type="button" class="btn bg-olive btn-xs"
-                                th:onclick="'findBookById('+${book.id}+')'"> 借阅
+                                th:onclick="'borrowBook('+${book.id}+')'"> 借阅
                         </button>
-                        <button th:if="${book.status == '1' || book.status == '2'}" type="button"
-                                class="btn bg-olive btn-xs" disabled="disabled">借阅
+                        <button th:if="${book.status != '0'}" type="button" class="btn bg-olive btn-xs" disabled="disabled">
+                            借阅
                         </button>
-                        <button sec:authorize="hasAuthority('ROLE_ADMIN')" type="button" class="btn bg-olive btn-xs"
+
+                        <button th:if="${book.status == '0'}" type="button" class="btn btn-danger btn-xs"
+                                th:onclick="'buyBook('+${book.id}+')'"> 购买
+                        </button>
+                        <button th:if="${book.status != '0'}" type="button" class="btn btn-danger btn-xs" disabled="disabled">
+                            购买
+                        </button>
+
+                        <button sec:authorize="hasAuthority('ROLE_ADMIN')" type="button" class="btn bg-gray btn-xs"
                                 th:onclick="'delBookById('+${book.id}+')'"> 删除
                         </button>
                     </td>
@@ -66,12 +77,29 @@
     </div>
 </div>
 <script>
-    function findBookById(id) {
-        window.location.href = "/book/find/" + id;
+    function borrowBook(id) {
+        if(confirm("确定要借阅这本书吗？")) {
+            window.location.href = "/book/borrow/" + id;
+        }
     }
+
+    function buyBook(id) {
+        if(confirm("确定要购买这本书吗？这将生成订单。")) {
+            window.location.href = "/book/buy/" + id;
+        }
+    }
+
     function delBookById(id) {
-        window.location.href = "/book/del/" + id;
+        if(confirm("确定删除吗？")) {
+            window.location.href = "/book/del/" + id;
+        }
+    }
+
+    // 兼容旧代码调用
+    function findBookById(id) {
+        borrowBook(id);
     }
 </script>
 </body>
 </html>
+}

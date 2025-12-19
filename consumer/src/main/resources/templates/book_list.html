@@ -11,8 +11,8 @@
     <div class="pull-right">
         <div class="has-feedback">
             <form th:action="@{/book/search}" method="post">
-                图书名称：<input name="name">&nbsp;&nbsp;&nbsp;&nbsp;
-                图书作者：<input name="author">&nbsp;&nbsp;&nbsp;&nbsp;
+                图书名称：<input name="name">&nbsp;&nbsp;
+                图书作者：<input name="author">&nbsp;&nbsp;
                 <input class="btn btn-default" type="submit" value="查询">
             </form>
         </div>
@@ -24,7 +24,7 @@
                 <th>图书名称</th>
                 <th>图书作者</th>
                 <th>出版社</th>
-                <th>图书状态</th>
+                <th>价格</th> <th>图书状态</th>
                 <th>操作</th>
             </tr>
             </thead>
@@ -34,18 +34,25 @@
                     <td th:text="${book.name}"></td>
                     <td th:text="${book.author}"></td>
                     <td th:text="${book.press}"></td>
-                    <td>
-                        <span th:if="${book.status == '0'}">可借阅</span>
-                        <span th:if="${book.status == '1'}">借阅中</span>
-                        <span th:if="${book.status == '2'}">归还中</span>
-                    </td>
+                    <td th:text="'￥' + ${book.price}"></td> <td>
+                    <span th:if="${book.status == '0'}" class="label label-success">可借阅/购买</span>
+                    <span th:if="${book.status == '1'}" class="label label-warning">借阅中</span>
+                    <span th:if="${book.status == '2'}" class="label label-info">归还中</span>
+                    <span th:if="${book.status == '3'}" class="label label-danger">已售出</span>
+                </td>
                     <td class="text-center">
-                        <button th:if="${book.status == '0'}" type="button" class="btn bg-olive btn-xs"
-                                th:onclick="'findBookById('+${book.id}+')'"> 借阅
-                        </button>
-                        <button th:if="${book.status == '1' || book.status == '2'}" type="button"
-                                class="btn bg-olive btn-xs" disabled="disabled">借阅
-                        </button>
+                        <div th:if="${book.status == '0'}">
+                            <button type="button" class="btn bg-olive btn-xs"
+                                    th:onclick="'findBookById('+${book.id}+')'"> 借阅
+                            </button>
+                            &nbsp;
+                            <button type="button" class="btn btn-danger btn-xs"
+                                    th:onclick="'buyBookById('+${book.id}+')'"> 购买
+                            </button>
+                        </div>
+                        <div th:if="${book.status != '0'}">
+                            <button type="button" class="btn btn-default btn-xs" disabled="disabled">不可操作</button>
+                        </div>
                     </td>
                 </tr>
             </th:block>
@@ -54,9 +61,18 @@
     </div>
 </div>
 <script>
-    // 修改为页面跳转，触发 Controller 的 redirect
+    // 借阅
     function findBookById(id) {
-        window.location.href = "/book/find/" + id;
+        if(confirm("确定要借阅这本书吗？")) {
+            window.location.href = "/book/find/" + id;
+        }
+    }
+
+    // 购买
+    function buyBookById(id) {
+        if(confirm("确定要购买这本书吗？")) {
+            window.location.href = "/book/buy/" + id;
+        }
     }
 </script>
 </body>

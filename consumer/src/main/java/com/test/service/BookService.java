@@ -12,17 +12,25 @@ import java.util.List;
 public interface BookService {
 
     @RequestMapping("/list")
-    public List<EBook> findAllBooks();
+    List<EBook> findAllBooks();
 
     @RequestMapping("/search")
-    public List<EBook> searchBook(@RequestBody EBook books);
+    List<EBook> searchBook(@RequestBody EBook books);
+
+    // 获取图书详情
+    @RequestMapping("/get/{id}")
+    EBook getBookById(@PathVariable("id") Integer id);
+
+    // 更新图书状态 (1:借阅, 3:购买)
+    @RequestMapping("/status/{id}/{status}")
+    Boolean updateStatus(@PathVariable("id") Integer id, @PathVariable("status") String status);
 
     @RequestMapping("/find/{id}")
-    public Boolean updateBook(@PathVariable("id") Integer id);
+    Boolean updateBook(@PathVariable("id") Integer id); // 旧接口
 
     @RequestMapping("/del/{id}")
-    public void delBookById(@PathVariable("id") Integer id);
+    void delBookById(@PathVariable("id") Integer id);
 
     @RequestMapping("/addbook")
-    public void addBook(@RequestBody EBook book);
+    void addBook(@RequestBody EBook book);
 }
