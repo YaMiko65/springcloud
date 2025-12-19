@@ -10,6 +10,7 @@ import java.util.List;
 
 @FeignClient(name = "bookProvider", url = "http://localhost:9527")
 public interface BookService {
+
     @RequestMapping("/list")
     List<EBook> findAllBooks();
 
@@ -22,6 +23,7 @@ public interface BookService {
     @RequestMapping("/status/{id}/{status}")
     Boolean updateStatus(@PathVariable("id") Integer id, @PathVariable("status") String status);
 
+    // 对应 Provider 的 updateBookInfo 方法
     @PostMapping("/updateInfo")
     Boolean updateBookInfo(@RequestBody EBook book);
 

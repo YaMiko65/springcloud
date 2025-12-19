@@ -7,34 +7,33 @@ spring:
   cloud:
     gateway:
       routes:
-        # --- 图书服务 (保持不变，8001正确) ---
+        # --- 图书服务 ---
         - id: book-service-route
           uri: http://localhost:8001
           predicates:
-            - Path=/book/**,/get/**,/status/**,/list,/search,/del/**,/addbook,/find/**
+            # 在这里添加了 /updateInfo
+            - Path=/book/**,/get/**,/status/**,/list,/search,/del/**,/addbook,/find/**,/updateInfo
 
-        # --- 登录服务 (修正为 8003) ---
+        # --- 登录服务 ---
         - id: login-service-route
           uri: http://localhost:8003
           predicates:
             - Path=/getUserByUsername/**,/findUserByUserId/**
 
-        # --- 订单服务 (修正为 8004) ---
+        # --- 订单服务 ---
         - id: order-service-route
           uri: http://localhost:8004
           predicates:
             - Path=/order/**
 
-        # --- 库存服务 (新增) ---
+        # --- 库存服务 ---
         - id: inventory-service-route
           uri: http://localhost:8005
           predicates:
             - Path=/inventory/**
 
-        # --- 页面前端 (保持不变) ---
+        # --- 页面前端 ---
         - id: consumer-service-route
           uri: http://localhost:80
-          # 注意：你的 consumer 实际跑在 8002，如果这里想访问 consumer，可能需要改为 8002
-          # 除非你使用了 nginx 或其他工具将 80 转发到 8002
           predicates:
             - Path=/consumer/**,/loginview

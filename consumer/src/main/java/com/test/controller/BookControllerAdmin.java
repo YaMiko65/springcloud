@@ -25,28 +25,33 @@ public class BookControllerAdmin {
     @Autowired
     private RemoteInventoryService inventoryService;
 
-    // 辅助方法：填充库存
+    // 辅助方法：批量填充库存信息
     private void populateStock(List<EBook> books) {
         if (books == null) return;
         for (EBook book : books) {
             try {
+                // 远程调用库存服务获取库存
                 Inventory inv = inventoryService.getStockByBookId(book.getId());
                 book.setStock(inv != null && inv.getStock() != null ? inv.getStock() : 0);
             } catch (Exception e) {
+                // 容错处理，如果库存服务不可用，显示0
                 book.setStock(0);
+                e.printStackTrace();
             }
         }
     }
 
+    // 图书管理列表页
     @RequestMapping("manag")
     @Secured("ROLE_ADMIN")
     public String findAllBooks(Model model) {
         List<EBook> books = bookService.findAllBooks();
-        populateStock(books);
+        populateStock(books); // 填充库存，确保管理员看到最新数据
         model.addAttribute("books", books);
         return "book_manag";
     }
 
+    // 搜索功能
     @RequestMapping("search")
     public String searchBook(Model model, EBook book) {
         List<EBook> books = bookService.searchBook(book);
@@ -58,44 +63,49 @@ public class BookControllerAdmin {
     // 跳转到添加页面
     @RequestMapping("jumpaddbook")
     public String jumpBookAdd(Model model) {
-        model.addAttribute("book", new EBook()); // 传空对象用于新增
+        model.addAttribute("book", new EBook()); // 传空对象用于新增表单绑定
         return "addpagebook";
     }
 
-    // [新增] 跳转到编辑页面 (回显数据)
+    // [核心功能] 跳转到编辑页面 (数据回显)
     @RequestMapping("jumpedit/{id}")
     public String jumpBookEdit(@PathVariable("id") Integer id, Model model) {
-        // 1. 获取图书基本信息
+        // 1. 远程调用获取图书基本信息
         EBook book = bookService.getBookById(id);
-        // 2. 获取库存信息
+
+        // 2. 远程调用获取库存信息
         Inventory inv = inventoryService.getStockByBookId(id);
-        if (inv != null) {
+        if (inv != null && inv.getStock() != null) {
             book.setStock(inv.getStock());
         } else {
             book.setStock(0);
         }
+
         model.addAttribute("book", book);
         return "addpagebook"; // 复用添加页面
     }
 
-    // [修改] 统一保存接口 (新增/修改)
+    // [核心功能] 统一保存接口 (支持新增和修改)
     @PostMapping("savebook")
     public String saveBook(EBook book, @RequestParam(value = "stock", defaultValue = "0") Integer stock) {
         if (book.getId() == null) {
-            // 新增
+            // --- 新增逻辑 ---
             EBook savedBook = bookService.addBook(book);
+            // 只有当图书保存成功且有ID返回时，才保存库存
             if (savedBook != null && savedBook.getId() != null) {
                 saveInventory(savedBook.getId(), stock);
             }
         } else {
-            // 修改 (调用全量更新接口)
+            // --- 修改逻辑 ---
+            // 1. 更新图书基本信息 (调用 Provider 的 updateInfo 接口)
             bookService.updateBookInfo(book);
-            // 更新库存
+            // 2. 更新库存信息 (调用 Inventory Provider 的接口)
             saveInventory(book.getId(), stock);
         }
         return "redirect:/book/admin/manag";
     }
 
+    // 辅助方法：保存库存
     private void saveInventory(Integer bookId, Integer stock) {
         Inventory inv = new Inventory();
         inv.setBookId(bookId);
@@ -103,6 +113,7 @@ public class BookControllerAdmin {
         inventoryService.saveStock(inv);
     }
 
+    // 删除图书
     @RequestMapping("del/{id}")
     public String deleteBook(@PathVariable("id") Integer id) {
         bookService.delBookById(id);

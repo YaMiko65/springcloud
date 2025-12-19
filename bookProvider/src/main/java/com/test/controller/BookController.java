@@ -32,19 +32,20 @@ public class BookController {
         return false;
     }
 
-    // [新增] 用于编辑图书所有信息
+    // [核心功能] 处理图书信息的全量更新
     @PostMapping("/updateInfo")
     public Boolean updateBookInfo(@RequestBody EBook book) {
+        // 使用 MyBatis Plus 的 updateById 方法更新数据库
         return bookService.updateById(book);
     }
 
     @RequestMapping("/del/{id}")
     public void delBookById(@PathVariable("id") Integer id){ bookService.removeById(id); }
 
-    // [修改] 返回对象以获取ID
+    // [核心功能] 新增图书，并返回带 ID 的对象
     @PostMapping("/addbook")
     public EBook addBook(@RequestBody EBook book){
         bookService.save(book);
-        return book;
+        return book; // 返回的对象包含自动生成的 ID
     }
 }
