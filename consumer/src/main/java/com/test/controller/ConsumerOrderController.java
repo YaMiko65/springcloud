@@ -1,11 +1,13 @@
 package com.test.controller;
 
+import com.test.pojo.EBook;
 import com.test.pojo.Order;
 import com.test.pojo.UserDto;
 import com.test.service.BookService;
 import com.test.service.LoginService;
 import com.test.service.RemoteOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,38 +40,51 @@ public class ConsumerOrderController {
         return "order_list";
     }
 
-    // [新增] 购买图书接口
+    // [修正] 统一后的购买接口
     @GetMapping("/buy/{bookId}")
     public String buyBook(@PathVariable("bookId") Long bookId) {
-        // 1. 获取当前登录用户的用户名
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // 2. 远程调用获取用户信息（为了拿到 userId）
-        UserDto user = loginService.getUserByUsername(username);
-        if (user == null) {
-            // 如果找不到用户，重定向回登录页（或者抛出异常）
+        // 1. 获取当前登录用户 (不再硬编码 ID 1)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/loginview";
+        }
+        String username = authentication.getName();
+        UserDto user = loginService.getUserByUsername(username);
+
+        if (user == null) {
+            return "redirect:/loginview";
+        }
+
+        // 2. 获取真实图书信息 (不再硬编码价格 50.00)
+        // 注意：BookService 接收 Integer 类型 ID
+        EBook book = bookService.getBookById(bookId.intValue());
+
+        // 校验图书是否存在以及状态是否可售 (0: 可售)
+        if (book == null || !"0".equals(book.getStatus())) {
+            // 如果书不存在或已被借阅/售出，跳转回列表并提示（这里简单跳回）
+            return "redirect:/book/list";
         }
 
         // 3. 构建订单对象
         Order order = new Order();
         order.setUserId(Long.valueOf(user.getId()));
         order.setBookId(bookId);
-        order.setCount(1); // 默认购买1本
-        // 注意：实际场景中应该先调用 bookService.getBookById(bookId) 获取真实价格
-        // 这里为了演示，假设价格固定为 50.00
-        order.setPrice(new BigDecimal("50.00"));
-        order.setTotalPrice(new BigDecimal("50.00"));
+        order.setCount(1);
+
+        // 使用数据库中的真实价格
+        order.setPrice(book.getPrice());
+        order.setTotalPrice(book.getPrice()); // 数量为1，总价等于单价
         order.setCreateTime(new Date());
 
         // 4. 调用远程服务创建订单
-        remoteOrderService.createOrder(order);
+        boolean orderCreated = remoteOrderService.createOrder(order);
 
-        // 5. 调用远程服务修改图书状态（设置为 1，表示已售出/不可用）
-        // 注意：bookId 是 Long，但 BookService 接口可能接收 Integer，视具体定义而定
-        bookService.updateBook(bookId.intValue());
+        // 5. 如果订单创建成功，更新图书状态为 "3" (已售出)
+        //
+        if (orderCreated) {
+            bookService.updateStatus(bookId.intValue(), "3");
+        }
 
-        // 6. 购买成功，重定向到我的订单页面
         return "redirect:/consumer/order/view";
     }
 }
