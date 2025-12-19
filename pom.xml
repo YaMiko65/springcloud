@@ -12,7 +12,9 @@
         <module>consumer</module>
         <module>loginProvider</module>
         <module>orderProvider</module>
-        <module>gateway</module> </modules>
+        <module>gateway</module>
+        <module>inventoryProvider</module>
+    </modules>
 
     <version>1.0-SNAPSHOT</version>
 

@@ -25,6 +25,12 @@ spring:
           predicates:
             - Path=/order/**
 
+        # --- 库存服务 (新增) ---
+        - id: inventory-service-route
+          uri: http://localhost:8005
+          predicates:
+            - Path=/inventory/**
+
         # --- 页面前端 (保持不变) ---
         - id: consumer-service-route
           uri: http://localhost:80

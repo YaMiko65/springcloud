@@ -1,0 +1,15 @@
+server:
+  port: 8005
+
+spring:
+  application:
+    name: inventoryProvider # 服务名称
+  datasource:
+    # 请确保数据库中创建了对应的库存表
+    url: "jdbc:mysql://localhost:3306/spring?useSSL=false&serverTimezone=Asia/Shanghai"
+    username: root
+    password: 123456
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848

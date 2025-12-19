@@ -9,7 +9,10 @@ public class EBook {
     private String author;
     private String press;
     private String status; // 0:可借阅, 1:借阅中, 2:归还中, 3:已售出
-    private BigDecimal price; // 新增价格字段
+    private BigDecimal price;
+
+    // --- 新增库存字段 (不存数据库，只用于展示) ---
+    private Integer stock;
 
     public EBook() {
     }
@@ -32,6 +35,7 @@ public class EBook {
                 ", press='" + press + '\'' +
                 ", status='" + status + '\'' +
                 ", price=" + price +
+                ", stock=" + stock +
                 '}';
     }
 
@@ -81,5 +85,13 @@ public class EBook {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 }
