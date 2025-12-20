@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -61,10 +62,23 @@ public class BookController {
         return "book_list";
     }
 
-    // 借阅图书
+    // [修改] 借阅图书，增加数量参数
     @RequestMapping("/find/{id}")
-    public String updateBook(@PathVariable("id") Integer id) {
-        bookService.updateStatus(id, "1");
+    public String updateBook(@PathVariable("id") Integer id,
+                             @RequestParam(value = "count", defaultValue = "1") Integer count) {
+        // 调用库存服务扣减库存
+        boolean success = inventoryService.decreaseStock(id, count);
+
+        if (success) {
+            // 扣减成功，代表借阅成功。
+            // 注意：这里不再将图书状态改为"1"(借阅中)，只要还有库存，其他人就能继续借阅。
+            // 如果业务需求是借阅一次库存-1，此处逻辑已满足。
+            System.out.println("借阅成功，图书ID: " + id + ", 数量: " + count);
+        } else {
+            // 扣减失败（库存不足），可以添加错误处理逻辑
+            System.out.println("借阅失败，库存不足，图书ID: " + id);
+        }
+
         return "redirect:/book/list";
     }
 }

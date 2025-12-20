@@ -18,7 +18,7 @@ public class InventoryController {
         return inventoryService.query().eq("book_id", bookId).one();
     }
 
-    // [新增] 保存或更新库存
+    // 保存或更新库存
     @PostMapping("/save")
     public boolean saveStock(@RequestBody Inventory inventory) {
         QueryWrapper<Inventory> qw = new QueryWrapper<>();
@@ -31,5 +31,11 @@ public class InventoryController {
         } else {
             return inventoryService.save(inventory);
         }
+    }
+
+    // [新增] 扣减库存接口
+    @PostMapping("/decrease")
+    public boolean decreaseStock(@RequestParam("bookId") Integer bookId, @RequestParam("count") Integer count) {
+        return inventoryService.decreaseStock(bookId, count);
     }
 }

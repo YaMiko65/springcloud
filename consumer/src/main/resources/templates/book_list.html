@@ -27,7 +27,7 @@
                 <th>价格</th>
                 <th>库存</th>
                 <th>图书状态</th>
-                <th>操作</th>
+                <th>购买/借阅数量</th> <th>操作</th>
             </tr>
             </thead>
             <tbody>
@@ -43,6 +43,9 @@
                         <span th:if="${book.status == '1'}" class="label label-warning">借阅中</span>
                         <span th:if="${book.status == '2'}" class="label label-info">归还中</span>
                         <span th:if="${book.status == '3'}" class="label label-danger">已售出</span>
+                    </td>
+                    <td>
+                        <input type="number" th:id="'count-' + ${book.id}" value="1" min="1" class="form-control input-sm" style="width: 60px; margin: 0 auto;">
                     </td>
                     <td class="text-center">
                         <div th:if="${book.status == '0'}">
@@ -67,15 +70,31 @@
 <script>
     // 借阅
     function findBookById(id) {
-        if(confirm("确定要借阅这本书吗？")) {
-            window.location.href = "/book/find/" + id;
+        // 获取对应ID的数量
+        var count = $('#count-' + id).val();
+        if (count == null || count < 1) {
+            alert("请输入正确的数量！");
+            return;
+        }
+
+        if (confirm("确定要借阅 " + count + " 本这本书吗？")) {
+            // 传递 count 参数
+            window.location.href = "/book/find/" + id + "?count=" + count;
         }
     }
 
     // 购买
     function buyBookById(id) {
-        if(confirm("确定要购买这本书吗？")) {
-            window.location.href = "/book/buy/" + id;
+        // 获取对应ID的数量
+        var count = $('#count-' + id).val();
+        if (count == null || count < 1) {
+            alert("请输入正确的数量！");
+            return;
+        }
+
+        if (confirm("确定要购买 " + count + " 本这本书吗？")) {
+            // 传递 count 参数
+            window.location.href = "/consumer/order/buy/" + id + "?count=" + count;
         }
     }
 </script>

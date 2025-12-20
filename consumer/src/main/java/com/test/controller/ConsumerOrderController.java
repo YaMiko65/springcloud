@@ -5,6 +5,7 @@ import com.test.pojo.Order;
 import com.test.pojo.UserDto;
 import com.test.service.BookService;
 import com.test.service.LoginService;
+import com.test.service.RemoteInventoryService;
 import com.test.service.RemoteOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -15,7 +16,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal; // 导入 BigDecimal
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -28,12 +31,15 @@ public class ConsumerOrderController {
     private RemoteOrderService remoteOrderService;
 
     @Autowired
+    private RemoteInventoryService remoteInventoryService;
+
+    @Autowired
     private LoginService loginService;
 
     @Autowired
     private BookService bookService;
 
-    // 查看订单列表 (根据权限区分)
+    // 查看订单列表
     @GetMapping("/view")
     public String viewOrders(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -41,7 +47,6 @@ public class ConsumerOrderController {
             return "redirect:/loginview";
         }
 
-        // 判断是否为管理员
         boolean isAdmin = false;
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         for (GrantedAuthority authority : authorities) {
@@ -53,10 +58,8 @@ public class ConsumerOrderController {
 
         List<Order> orders;
         if (isAdmin) {
-            // 1. 管理员查看所有订单
             orders = remoteOrderService.getAllOrders();
         } else {
-            // 2. 普通用户只看自己的订单
             String username = authentication.getName();
             UserDto user = loginService.getUserByUsername(username);
             if (user != null) {
@@ -70,8 +73,10 @@ public class ConsumerOrderController {
         return "order_list";
     }
 
+    // [修改] 购买图书
     @GetMapping("/buy/{bookId}")
-    public String buyBook(@PathVariable("bookId") Long bookId) {
+    public String buyBook(@PathVariable("bookId") Long bookId,
+                          @RequestParam(value = "count", defaultValue = "1") Integer count) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/loginview";
@@ -85,22 +90,32 @@ public class ConsumerOrderController {
 
         EBook book = bookService.getBookById(bookId.intValue());
 
-        if (book == null || !"0".equals(book.getStatus())) {
+        if (book == null) {
             return "redirect:/book/list";
         }
 
-        Order order = new Order();
-        order.setUserId(Long.valueOf(user.getId()));
-        order.setBookId(bookId);
-        order.setCount(1);
-        order.setPrice(book.getPrice());
-        order.setTotalPrice(book.getPrice());
-        order.setCreateTime(new Date());
+        // 1. 尝试扣减库存
+        boolean stockDecreased = remoteInventoryService.decreaseStock(bookId.intValue(), count);
 
-        boolean orderCreated = remoteOrderService.createOrder(order);
+        if (stockDecreased) {
+            // 2. 库存扣减成功，创建订单
+            Order order = new Order();
+            order.setUserId(Long.valueOf(user.getId()));
+            order.setBookId(bookId);
+            order.setCount(count);
+            order.setPrice(book.getPrice());
 
-        if (orderCreated) {
-            bookService.updateStatus(bookId.intValue(), "3");
+            // [修复] 使用 BigDecimal 的 multiply 方法计算总价
+            // book.getPrice() * count -> book.getPrice().multiply(new BigDecimal(count))
+            BigDecimal total = book.getPrice().multiply(new BigDecimal(count));
+            order.setTotalPrice(total);
+
+            order.setCreateTime(new Date());
+
+            remoteOrderService.createOrder(order);
+        } else {
+            System.out.println("购买失败，库存不足");
+            return "redirect:/book/list";
         }
 
         return "redirect:/consumer/order/view";
