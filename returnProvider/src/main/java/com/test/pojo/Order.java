@@ -8,29 +8,15 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-// @TableName("t_order")  <-- 删除
 public class Order implements Serializable {
-
-    // @TableId(type = IdType.AUTO) <-- 删除
     private Long id;
-
     private Long userId;
-
     private Long bookId;
-
     private Integer count;
-
     private BigDecimal price;
-
     private BigDecimal totalPrice;
-
-    private Integer status;
+    private Integer status; // 0-未归还, 1-已归还
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
-
-    // 下面这三个字段本来就标了 exist=false，在 consumer 端直接保留字段即可，注解删掉
-    private String bookName;
-    private String userName;
-    private String orderType;
 }

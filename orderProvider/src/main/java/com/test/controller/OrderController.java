@@ -16,18 +16,20 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    // [保留] 管理员可能需要查看所有订单
+    // ... list, user list, getOrder ...
+
     @GetMapping("/list")
     public List<Order> getAllOrders() {
-        return orderService.list();
+        QueryWrapper<Order> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc("create_time");
+        return orderService.list(wrapper);
     }
 
-    // [新增] 根据用户ID获取订单列表
     @GetMapping("/user/{userId}")
     public List<Order> getOrdersByUserId(@PathVariable("userId") Long userId) {
         QueryWrapper<Order> wrapper = new QueryWrapper<>();
         wrapper.eq("user_id", userId);
-        wrapper.orderByDesc("create_time"); // 按时间倒序
+        wrapper.orderByDesc("create_time");
         return orderService.list(wrapper);
     }
 
@@ -39,6 +41,21 @@ public class OrderController {
     @PostMapping("/create")
     public boolean createOrder(@RequestBody Order order) {
         order.setCreateTime(new Date());
+        // 默认状态为 0 (未归还)
+        if (order.getStatus() == null) {
+            order.setStatus(0);
+        }
         return orderService.save(order);
+    }
+
+    // [新增] 更新订单状态
+    @PostMapping("/updateStatus")
+    public boolean updateStatus(@RequestParam("id") Long id, @RequestParam("status") Integer status) {
+        Order order = orderService.getById(id);
+        if (order != null) {
+            order.setStatus(status);
+            return orderService.updateById(order);
+        }
+        return false;
     }
 }

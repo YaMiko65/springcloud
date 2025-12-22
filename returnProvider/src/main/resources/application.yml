@@ -1,0 +1,12 @@
+server:
+  port: 8007
+
+spring:
+  application:
+    name: return-provider
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # 确保这是你 Nacos 的地址
+
+# 移除之前的 eureka 配置

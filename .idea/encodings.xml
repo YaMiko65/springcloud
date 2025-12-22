@@ -17,6 +17,8 @@
     <file url="file://$PROJECT_DIR$/loginProvider/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/orderProvider/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/orderProvider/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/returnProvider/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/returnProvider/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>
