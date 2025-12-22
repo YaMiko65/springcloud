@@ -20,6 +20,14 @@ public class AccountController {
         return rows > 0;
     }
 
+    // [新增] 更新账号状态接口
+    @PostMapping("/updateStatus")
+    public boolean updateStatus(@RequestParam("username") String username,
+                                @RequestParam("valid") String valid) {
+        int rows = accountDao.updateStatus(username, valid);
+        return rows > 0;
+    }
+
     @GetMapping("/list")
     public List<UserDto> getAllUsers() {
         return accountDao.findAllUsers();

@@ -19,6 +19,12 @@ public class AccountDao {
         return jdbcTemplate.update(sql, newPassword, username);
     }
 
+    // [新增] 修改账号状态
+    public int updateStatus(String username, String valid) {
+        String sql = "UPDATE user SET valid = ? WHERE username = ?";
+        return jdbcTemplate.update(sql, valid, username);
+    }
+
     // 获取所有用户（供管理员使用）
     public List<UserDto> findAllUsers() {
         String sql = "SELECT * FROM user";
