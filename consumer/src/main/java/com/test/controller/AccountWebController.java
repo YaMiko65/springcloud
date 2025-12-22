@@ -42,6 +42,12 @@ public class AccountWebController {
                           HttpServletRequest request,
                           HttpServletResponse response) {
 
+        // [新增] 1. 校验密码长度约束
+        if (password == null || password.length() < 6) {
+            model.addAttribute("error", "修改失败：新密码长度不能少于6位");
+            return "account_reset";
+        }
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
