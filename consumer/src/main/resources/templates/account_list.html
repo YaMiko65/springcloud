@@ -18,6 +18,18 @@
             </button>
         </div>
     </div>
+
+    <div class="box-body" th:if="${error} or ${msg}">
+        <div class="alert alert-danger alert-dismissible" th:if="${error}">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4 style="margin-bottom: 0;"><i class="icon fa fa-ban"></i> <span th:text="${error}"></span></h4>
+        </div>
+        <div class="alert alert-success alert-dismissible" th:if="${msg}">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4 style="margin-bottom: 0;"><i class="icon fa fa-check"></i> <span th:text="${msg}"></span></h4>
+        </div>
+    </div>
+
     <div class="box-body no-padding">
         <table class="table table-striped table-hover">
             <thead>
@@ -80,7 +92,7 @@
                     </div>
                     <div class="form-group">
                         <label for="newPassword">新密码</label>
-                        <input type="password" class="form-control" id="newPassword" name="password" placeholder="请输入新密码" required>
+                        <input type="password" class="form-control" id="newPassword" name="password" placeholder="请输入新密码（至少6位）" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -120,7 +132,7 @@
 </div>
 
 <script>
-    // 将点击的用户名填充到重置密码模态框中
+    // 填充用户名到模态框
     function setResetUsername(username) {
         $('#resetUsername').val(username);
         $('#newPassword').val('');

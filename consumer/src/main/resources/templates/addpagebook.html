@@ -9,11 +9,12 @@
         h1 { color: #333; margin-bottom: 20px; }
         form { background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; width: 400px; }
         label { color: #555; font-weight: 600; margin-bottom: 5px; margin-top: 10px; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
         input[type="submit"] { background-color: #007BFF; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; width: 100%; }
         input[type="submit"]:hover { background-color: #0056b3; }
-        /* [新增] 错误提示样式 */
+        /* 错误和警告提示样式 */
         .error-msg { color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 14px; text-align: center; }
+        .warning-msg { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 5px; border-radius: 4px; margin-top: 5px; font-size: 12px; display: none; }
     </style>
 </head>
 <body>
@@ -38,11 +39,40 @@
 
     <label for="stock">库存:</label>
     <input type="number" id="stock" name="stock" th:value="${book.stock}" required placeholder="0">
+    <div id="stock-warning" class="warning-msg">⚠️ 库存紧张，请及时补货！</div>
 
-    <label for="status">状态 (0:正常, 3:已售):</label>
-    <input type="text" id="status" name="status" th:value="${book.status}" required placeholder="0">
+    <label for="status">状态:</label>
+    <select id="status" name="status" required>
+        <option value="0" th:selected="${book.status == '0'}">正常</option>
+        <option value="1" th:selected="${book.status == '1'}">暂无库存</option>
+    </select>
 
     <input type="submit" value="提交">
 </form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var stockInput = document.getElementById('stock');
+        var warningDiv = document.getElementById('stock-warning');
+
+        function checkStock() {
+            var val = parseInt(stockInput.value);
+            // 当库存小于10且不为空时显示警告
+            if (!isNaN(val) && val < 10 && val >= 0) {
+                warningDiv.style.display = 'block';
+            } else {
+                warningDiv.style.display = 'none';
+            }
+        }
+
+        // 监听输入事件
+        stockInput.addEventListener('input', checkStock);
+
+        // 页面加载时也检查一次（针对编辑回显的情况）
+        if(stockInput.value) {
+            checkStock();
+        }
+    });
+</script>
 </body>
 </html>

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.math.BigDecimal; // [新增] 引入BigDecimal用于价格比较
+import java.math.BigDecimal;
 import java.util.List;
 
 @Controller
@@ -92,7 +92,7 @@ public class BookControllerAdmin {
                            @RequestParam(value = "stock", defaultValue = "0") Integer stock,
                            Model model) {
 
-        // [新增] 校验逻辑：价格不能为负数
+        // [校验逻辑] 价格不能为负数
         if (book.getPrice() != null && book.getPrice().compareTo(BigDecimal.ZERO) < 0) {
             model.addAttribute("error", "保存失败：图书价格不能为负数");
             book.setStock(stock); // 回填用户输入的库存，防止页面数据丢失
@@ -100,7 +100,7 @@ public class BookControllerAdmin {
             return "addpagebook"; // 返回编辑页面显示错误
         }
 
-        // [新增] 校验逻辑：库存不能为负数
+        // [校验逻辑] 库存不能为负数
         if (stock < 0) {
             model.addAttribute("error", "保存失败：库存数量不能为负数");
             book.setStock(stock);
