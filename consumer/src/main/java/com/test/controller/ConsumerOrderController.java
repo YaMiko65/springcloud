@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.math.BigDecimal; // 导入 BigDecimal
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -69,6 +69,43 @@ public class ConsumerOrderController {
             }
         }
 
+        // [新增] 遍历订单列表，填充详细信息（用户名、书名、订单类型）
+        if (orders != null && !orders.isEmpty()) {
+            for (Order order : orders) {
+                // 1. 填充书籍名称
+                if (order.getBookId() != null) {
+                    EBook book = bookService.getBookById(order.getBookId().intValue());
+                    if (book != null) {
+                        order.setBookName(book.getName());
+                    } else {
+                        order.setBookName("未知书籍");
+                    }
+                }
+
+                // 2. 填充用户姓名
+                if (order.getUserId() != null) {
+                    try {
+                        List<String> userInfos = loginService.findUserByUserId(order.getUserId().intValue());
+                        if (userInfos != null && !userInfos.isEmpty()) {
+                            // 假设 list 第一个元素是用户名
+                            order.setUserName(userInfos.get(0));
+                        } else {
+                            order.setUserName("未知用户");
+                        }
+                    } catch (Exception e) {
+                        order.setUserName("用户查询失败");
+                    }
+                }
+
+                // 3. 填充订单类型 (根据单价判断，大于0为购买，否则为借阅)
+                if (order.getPrice() != null && order.getPrice().compareTo(BigDecimal.ZERO) > 0) {
+                    order.setOrderType("购买");
+                } else {
+                    order.setOrderType("借阅");
+                }
+            }
+        }
+
         model.addAttribute("orders", orders);
         return "order_list";
     }
@@ -103,10 +140,9 @@ public class ConsumerOrderController {
             order.setUserId(Long.valueOf(user.getId()));
             order.setBookId(bookId);
             order.setCount(count);
-            order.setPrice(book.getPrice());
+            order.setPrice(book.getPrice()); // 购买时设置价格
 
-            // [修复] 使用 BigDecimal 的 multiply 方法计算总价
-            // book.getPrice() * count -> book.getPrice().multiply(new BigDecimal(count))
+            // 使用 BigDecimal 的 multiply 方法计算总价
             BigDecimal total = book.getPrice().multiply(new BigDecimal(count));
             order.setTotalPrice(total);
 

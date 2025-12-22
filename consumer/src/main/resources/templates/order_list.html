@@ -16,17 +16,29 @@
                 <thead>
                 <tr>
                     <th>订单ID</th>
-                    <th>用户ID</th>
-                    <th>书籍ID</th>
+                    <th>用户姓名</th>
+                    <th>书籍名称</th>
+                    <th>数量</th>
+                    <th>单价</th>
+                    <th>总价</th>
+                    <th>订单类型</th>
                     <th>下单时间</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="order : ${orders}">
                     <td th:text="${order.id}"></td>
-                    <td th:text="${order.userId}"></td>
-                    <td th:text="${order.bookId}"></td>
-                    <td th:text="${order.createTime != null} ? ${#dates.format(order.createTime, 'yyyy-MM-dd HH:mm:ss')} : '无时间'"></td>                </tr>
+                    <td th:text="${order.userName}"></td>
+                    <td th:text="${order.bookName}"></td>
+                    <td th:text="${order.count}"></td>
+                    <td th:text="${order.price}"></td>
+                    <td th:text="${order.totalPrice}"></td>
+                    <td>
+                        <span th:if="${order.orderType == '购买'}" class="label label-success" th:text="${order.orderType}"></span>
+                        <span th:if="${order.orderType == '借阅'}" class="label label-info" th:text="${order.orderType}"></span>
+                    </td>
+                    <td th:text="${order.createTime != null} ? ${#dates.format(order.createTime, 'yyyy-MM-dd HH:mm:ss')} : '无时间'"></td>
+                </tr>
                 </tbody>
             </table>
 
