@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,24 +24,37 @@ public class LoginServiceImpl implements UserDetailsService {
         // 1. 获取用户信息
         UserDto userDto = loginService.getUserByUsername(username);
         if (userDto == null) {
-            // 如果找不到用户，可以返回 null 由 Spring Security 处理，或抛出 UsernameNotFoundException
+            // 如果找不到用户，可以返回 null 由 Spring Security 处理
             return null;
         }
 
         // 2. 获取用户权限
         List<String> privilde = loginService.findUserByUserId(userDto.getId());
-        String[] privildeArrays = new String[privilde.size()];
-        privilde.toArray(privildeArrays);
+
+        // [核心修改]：处理权限列表，确保新用户拥有默认权限
+        // 创建一个新的 ArrayList 以确保集合是可变的（避免 RPC 返回不可变列表导致报错）
+        List<String> authorities = new ArrayList<>();
+        if (privilde != null) {
+            authorities.addAll(privilde);
+        }
+
+        // 如果权限列表为空（说明是新用户或未分配角色的用户），默认添加 ROLE_COMMON 权限
+        // 这样该用户登录后就能看到 main.html 中要求 ROLE_COMMON 的菜单项
+        if (authorities.isEmpty()) {
+            authorities.add("ROLE_COMMON");
+        }
+
+        // 将 List 转换为数组
+        String[] privildeArrays = authorities.toArray(new String[0]);
 
         // 3. 判断账号状态
-        // 假设 userDto.getValid() 为 "1" 时表示账号有效（启用），其他值表示无效（禁用）
-        // 请根据您数据库实际存储的值（如 "1"/"0" 或 "true"/"false"）调整此处的判断逻辑
+        // 假设 userDto.getValid() 为 "1" 时表示账号有效
         boolean isEnabled = "1".equals(userDto.getValid());
 
-        // 4. 构建 UserDetails 对象，并设置禁用状态
+        // 4. 构建 UserDetails 对象
         UserDetails userDetails = User.withUsername(userDto.getUsername())
                 .password(userDto.getPassword())
-                .disabled(!isEnabled) // 关键修改：如果 isEnabled 为 false，则将账户设为 disabled
+                .disabled(!isEnabled)
                 .authorities(privildeArrays).build();
 
         return userDetails;

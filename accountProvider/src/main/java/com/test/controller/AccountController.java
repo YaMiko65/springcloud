@@ -20,7 +20,6 @@ public class AccountController {
         return rows > 0;
     }
 
-    // [新增] 更新账号状态接口
     @PostMapping("/updateStatus")
     public boolean updateStatus(@RequestParam("username") String username,
                                 @RequestParam("valid") String valid) {
@@ -31,5 +30,19 @@ public class AccountController {
     @GetMapping("/list")
     public List<UserDto> getAllUsers() {
         return accountDao.findAllUsers();
+    }
+
+    // [新增] 添加用户接口
+    @PostMapping("/add")
+    public boolean addUser(@RequestBody UserDto user) {
+        int rows = accountDao.addUser(user);
+        return rows > 0;
+    }
+
+    // [新增] 删除用户接口
+    @PostMapping("/delete")
+    public boolean deleteUser(@RequestParam("id") Integer id) {
+        int rows = accountDao.deleteUser(id);
+        return rows > 0;
     }
 }

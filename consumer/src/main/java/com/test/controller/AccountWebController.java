@@ -69,24 +69,43 @@ public class AccountWebController {
         return "account_list";
     }
 
-    // [新增] 管理员重置指定用户密码
+    // 管理员重置指定用户密码
     @PostMapping("/admin/resetPwd")
     @Secured("ROLE_ADMIN")
     public String adminResetPwd(@RequestParam("username") String username,
                                 @RequestParam("password") String password) {
-        // 管理员修改他人密码，加密后直接调用服务
         String encodedPassword = passwordEncoder.encode(password);
         accountService.updatePassword(username, encodedPassword);
-        // 修改完重定向回列表页
         return "redirect:/consumer/account/manage";
     }
 
-    // [新增] 管理员修改用户状态 (1:正常, 0:禁用)
+    // 管理员修改用户状态
     @PostMapping("/admin/updateStatus")
     @Secured("ROLE_ADMIN")
     public String adminUpdateStatus(@RequestParam("username") String username,
                                     @RequestParam("valid") String valid) {
         accountService.updateStatus(username, valid);
+        return "redirect:/consumer/account/manage";
+    }
+
+    // [新增] 管理员添加用户
+    @PostMapping("/admin/add")
+    @Secured("ROLE_ADMIN")
+    public String adminAddUser(@RequestParam("username") String username,
+                               @RequestParam("password") String password) {
+        UserDto user = new UserDto();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password)); // 密码加密
+        user.setValid("1"); // 默认启用
+        accountService.addUser(user);
+        return "redirect:/consumer/account/manage";
+    }
+
+    // [新增] 管理员删除用户
+    @PostMapping("/admin/delete")
+    @Secured("ROLE_ADMIN")
+    public String adminDeleteUser(@RequestParam("id") Integer id) {
+        accountService.deleteUser(id);
         return "redirect:/consumer/account/manage";
     }
 }

@@ -19,7 +19,7 @@ public class AccountDao {
         return jdbcTemplate.update(sql, newPassword, username);
     }
 
-    // [新增] 修改账号状态
+    // 修改账号状态
     public int updateStatus(String username, String valid) {
         String sql = "UPDATE user SET valid = ? WHERE username = ?";
         return jdbcTemplate.update(sql, valid, username);
@@ -29,5 +29,18 @@ public class AccountDao {
     public List<UserDto> findAllUsers() {
         String sql = "SELECT * FROM user";
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(UserDto.class));
+    }
+
+    // [新增] 添加新用户
+    public int addUser(UserDto user) {
+        // 默认插入时状态为1（正常）
+        String sql = "INSERT INTO user (username, password, valid) VALUES (?, ?, ?)";
+        return jdbcTemplate.update(sql, user.getUsername(), user.getPassword(), "1");
+    }
+
+    // [新增] 删除用户
+    public int deleteUser(Integer id) {
+        String sql = "DELETE FROM user WHERE id = ?";
+        return jdbcTemplate.update(sql, id);
     }
 }
