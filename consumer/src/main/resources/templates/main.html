@@ -62,6 +62,17 @@
                         <i class="fa fa-circle-o"></i>图书管理
                     </a>
                 </li>
+                <li sec:authorize="hasAnyAuthority('ROLE_COMMON','ROLE_ADMIN')">
+                    <a th:href="@{/consumer/account/reset}" target="iframe">
+                        <i class="fa fa-key"></i>修改密码
+                    </a>
+                </li>
+
+                <li sec:authorize="hasAuthority('ROLE_ADMIN')">
+                    <a th:href="@{/consumer/account/manage}" target="iframe">
+                        <i class="fa fa-users"></i>账号管理
+                    </a>
+                </li>
             </ul>
         </section>
     </aside>

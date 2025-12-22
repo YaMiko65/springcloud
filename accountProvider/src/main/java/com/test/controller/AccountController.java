@@ -1,0 +1,27 @@
+package com.test.controller;
+
+import com.test.dao.AccountDao;
+import com.test.pojo.UserDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/account")
+public class AccountController {
+
+    @Autowired
+    private AccountDao accountDao;
+
+    @PostMapping("/updatePwd")
+    public boolean updatePassword(@RequestParam("username") String username,
+                                  @RequestParam("password") String password) {
+        int rows = accountDao.updatePassword(username, password);
+        return rows > 0;
+    }
+
+    @GetMapping("/list")
+    public List<UserDto> getAllUsers() {
+        return accountDao.findAllUsers();
+    }
+}

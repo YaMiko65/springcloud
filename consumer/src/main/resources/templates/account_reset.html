@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>重置密码</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
+    <link rel="stylesheet" th:href="@{/css/AdminLTE.css}">
+</head>
+<body class="hold-transition skin-green sidebar-mini">
+<div class="box box-primary" style="width: 50%; margin: 50px auto;">
+    <div class="box-header with-border">
+        <h3 class="box-title">重置个人密码</h3>
+    </div>
+    <form role="form" th:action="@{/consumer/account/doReset}" method="post">
+        <div class="box-body">
+            <div class="form-group">
+                <label for="password">新密码</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="请输入新密码" required>
+            </div>
+            <div class="text-danger" th:if="${error}" th:text="${error}"></div>
+        </div>
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">提交修改</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
