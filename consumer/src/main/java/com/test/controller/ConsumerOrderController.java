@@ -1,5 +1,6 @@
 package com.test.controller;
 
+// ... imports ...
 import com.test.pojo.EBook;
 import com.test.pojo.Order;
 import com.test.pojo.UserDto;
@@ -29,13 +30,10 @@ public class ConsumerOrderController {
 
     @Autowired
     private RemoteOrderService remoteOrderService;
-
     @Autowired
     private RemoteInventoryService remoteInventoryService;
-
     @Autowired
     private LoginService loginService;
-
     @Autowired
     private BookService bookService;
 
@@ -69,7 +67,6 @@ public class ConsumerOrderController {
             }
         }
 
-        // [新增] 遍历订单列表，填充详细信息（用户名、书名、订单类型）
         if (orders != null && !orders.isEmpty()) {
             for (Order order : orders) {
                 // 1. 填充书籍名称
@@ -82,13 +79,13 @@ public class ConsumerOrderController {
                     }
                 }
 
-                // 2. 填充用户姓名
+                // 2. [修改核心] 填充用户姓名
                 if (order.getUserId() != null) {
                     try {
-                        List<String> userInfos = loginService.findUserByUserId(order.getUserId().intValue());
-                        if (userInfos != null && !userInfos.isEmpty()) {
-                            // 假设 list 第一个元素是用户名
-                            order.setUserName(userInfos.get(0));
+                        // 改为调用 getUserById
+                        UserDto u = loginService.getUserById(order.getUserId().intValue());
+                        if (u != null) {
+                            order.setUserName(u.getUsername());
                         } else {
                             order.setUserName("未知用户");
                         }
@@ -97,7 +94,7 @@ public class ConsumerOrderController {
                     }
                 }
 
-                // 3. 填充订单类型 (根据单价判断，大于0为购买，否则为借阅)
+                // 3. 填充订单类型
                 if (order.getPrice() != null && order.getPrice().compareTo(BigDecimal.ZERO) > 0) {
                     order.setOrderType("购买");
                 } else {
@@ -140,9 +137,8 @@ public class ConsumerOrderController {
             order.setUserId(Long.valueOf(user.getId()));
             order.setBookId(bookId);
             order.setCount(count);
-            order.setPrice(book.getPrice()); // 购买时设置价格
+            order.setPrice(book.getPrice());
 
-            // 使用 BigDecimal 的 multiply 方法计算总价
             BigDecimal total = book.getPrice().multiply(new BigDecimal(count));
             order.setTotalPrice(total);
 

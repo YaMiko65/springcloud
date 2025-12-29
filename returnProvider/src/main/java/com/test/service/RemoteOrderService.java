@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "order-provider") // 确保这里的名字与 orderProvider 的 application.name 一致
+// [修改] name 必须与 orderProvider 的 spring.application.name (orderProvider) 一致
+@FeignClient(name = "orderProvider")
 public interface RemoteOrderService {
     @GetMapping("/order/{id}")
     Order getOrder(@PathVariable("id") Long id);

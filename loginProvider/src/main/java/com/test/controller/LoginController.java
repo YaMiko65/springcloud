@@ -18,12 +18,16 @@ public class LoginController {
     @RequestMapping("/getUserByUsername/{username}")
     public UserDto getUserByUsername(@PathVariable("username") String username){
         return loginService.getUserByUsername(username);
-    };
+    }
+
+    // [新增] 暴露根据ID查询用户的接口
+    @RequestMapping("/getUserById/{id}")
+    public UserDto getUserById(@PathVariable("id") Integer id){
+        return loginService.getUserById(id);
+    }
 
     @RequestMapping("/findUserByUserId/{userId}")
     public List<String> findUserByUserId(@PathVariable("userId") Integer userId){
         return loginService.findUserByUserId(userId);
-    };
-
-
+    }
 }

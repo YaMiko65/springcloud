@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes; // [新增] 引入重定向属性类
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -72,21 +72,17 @@ public class AccountWebController {
     public String manageUsers(Model model) {
         List<UserDto> users = accountService.getAllUsers();
         model.addAttribute("users", users);
-        // 注意：FlashAttribute 中的 error/msg 会自动合并到 Model 中，
-        // 所以这里不需要额外处理，页面可以直接使用 ${error}
         return "account_list";
     }
 
-    // [修改] 管理员重置指定用户密码
+    // 管理员重置指定用户密码
     @PostMapping("/admin/resetPwd")
     @Secured("ROLE_ADMIN")
     public String adminResetPwd(@RequestParam("username") String username,
                                 @RequestParam("password") String password,
-                                RedirectAttributes redirectAttributes) { // [新增] 注入 RedirectAttributes
+                                RedirectAttributes redirectAttributes) {
 
-        // [新增] 1. 校验密码长度
         if (password == null || password.length() < 6) {
-            // 使用 addFlashAttribute 在重定向后传递数据
             redirectAttributes.addFlashAttribute("error", "操作失败：用户 [" + username + "] 的新密码长度不能少于6位");
             return "redirect:/consumer/account/manage";
         }
@@ -94,7 +90,6 @@ public class AccountWebController {
         try {
             String encodedPassword = passwordEncoder.encode(password);
             accountService.updatePassword(username, encodedPassword);
-            // [新增] 2. 添加成功提示
             redirectAttributes.addFlashAttribute("msg", "操作成功：用户 [" + username + "] 的密码已重置");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "操作失败：系统异常");
@@ -112,16 +107,44 @@ public class AccountWebController {
         return "redirect:/consumer/account/manage";
     }
 
-    // 管理员添加用户
+    // [修改] 管理员添加用户 (增加校验逻辑)
     @PostMapping("/admin/add")
     @Secured("ROLE_ADMIN")
     public String adminAddUser(@RequestParam("username") String username,
-                               @RequestParam("password") String password) {
-        UserDto user = new UserDto();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setValid("1");
-        accountService.addUser(user);
+                               @RequestParam("password") String password,
+                               RedirectAttributes redirectAttributes) { // 注入 RedirectAttributes
+
+        // 1. 校验用户名是否为空
+        if (username == null || username.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "添加失败：用户名不能为空");
+            return "redirect:/consumer/account/manage";
+        }
+
+        // 2. 校验密码长度
+        if (password == null || password.length() < 6) {
+            redirectAttributes.addFlashAttribute("error", "添加失败：密码长度不能少于6位");
+            return "redirect:/consumer/account/manage";
+        }
+
+        try {
+            UserDto user = new UserDto();
+            user.setUsername(username);
+            user.setPassword(passwordEncoder.encode(password));
+            user.setValid("1"); // 默认启用
+
+            boolean success = accountService.addUser(user);
+
+            if (success) {
+                redirectAttributes.addFlashAttribute("msg", "添加成功：用户 [" + username + "] 已创建");
+            } else {
+                // 如果 Dao 层检测到重复返回 0，service 返回 false，进入这里
+                redirectAttributes.addFlashAttribute("error", "添加失败：用户 [" + username + "] 已存在或系统繁忙");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "添加失败：系统异常");
+            e.printStackTrace();
+        }
+
         return "redirect:/consumer/account/manage";
     }
 

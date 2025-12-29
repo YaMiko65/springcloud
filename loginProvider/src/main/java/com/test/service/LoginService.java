@@ -10,4 +10,5 @@ public interface LoginService {
 
     public List<String> findUserByUserId(Integer userId);
 
+    public UserDto getUserById(Integer id);
 }

@@ -16,13 +16,17 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public UserDto getUserByUsername(String username) {
-        UserDto userDto = loginDao.getUserByUsername(username);
-        return userDto;
+        return loginDao.getUserByUsername(username);
+    }
+
+    // [新增]
+    @Override
+    public UserDto getUserById(Integer id) {
+        return loginDao.getUserById(id);
     }
 
     @Override
     public List<String> findUserByUserId(Integer userId) {
-        List<String> userByUserId = loginDao.findUserByUserId(userId);
-        return userByUserId;
+        return loginDao.findUserByUserId(userId);
     }
 }

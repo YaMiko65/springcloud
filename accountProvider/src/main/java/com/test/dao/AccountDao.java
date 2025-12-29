@@ -31,14 +31,22 @@ public class AccountDao {
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(UserDto.class));
     }
 
-    // [新增] 添加新用户
+    // [修改] 添加新用户 (增加重复性校验)
     public int addUser(UserDto user) {
-        // 默认插入时状态为1（正常）
+        // 1. 检查用户名是否存在
+        String checkSql = "SELECT count(*) FROM user WHERE username = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, user.getUsername());
+
+        if (count != null && count > 0) {
+            return 0; // 用户名已存在，返回 0 表示没有任何行被插入
+        }
+
+        // 2. 执行插入，默认状态为1（正常）
         String sql = "INSERT INTO user (username, password, valid) VALUES (?, ?, ?)";
         return jdbcTemplate.update(sql, user.getUsername(), user.getPassword(), "1");
     }
 
-    // [新增] 删除用户
+    // 删除用户
     public int deleteUser(Integer id) {
         String sql = "DELETE FROM user WHERE id = ?";
         return jdbcTemplate.update(sql, id);

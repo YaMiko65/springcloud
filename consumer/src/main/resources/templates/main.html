@@ -44,37 +44,45 @@
         </nav>
     </header>
     <aside class="main-sidebar">
-        <section class="sidebar">
-            <ul class="sidebar-menu">
-                <li sec:authorize="hasAnyAuthority('ROLE_COMMON','ROLE_ADMIN')">
-                    <a th:href="@{/book/list}" target="iframe">
-                        <i class="fa fa-circle-o"></i>图书阅读
-                    </a>
-                </li>
+        <aside class="main-sidebar">
+            <section class="sidebar">
+                <ul class="sidebar-menu">
+                    <li sec:authorize="hasAnyAuthority('ROLE_COMMON','ROLE_ADMIN')">
+                        <a th:href="@{/book/list}" target="iframe">
+                            <i class="fa fa-book"></i> <span>图书阅读</span> </a>
+                    </li>
 
-                <li sec:authorize="hasAnyAuthority('ROLE_COMMON','ROLE_ADMIN')">
-                    <a th:href="@{/consumer/order/view}" target="iframe">
-                        <i class="fa fa-circle-o"></i>我的订单
-                    </a>
-                </li>
-                <li sec:authorize="hasAuthority('ROLE_ADMIN')">
-                    <a th:href="@{/book/admin/manag}" target="iframe">
-                        <i class="fa fa-circle-o"></i>图书管理
-                    </a>
-                </li>
-                <li sec:authorize="hasAnyAuthority('ROLE_COMMON','ROLE_ADMIN')">
-                    <a th:href="@{/consumer/account/reset}" target="iframe">
-                        <i class="fa fa-key"></i>修改密码
-                    </a>
-                </li>
+                    <li sec:authorize="hasAnyAuthority('ROLE_COMMON','ROLE_ADMIN')">
+                        <a th:href="@{/consumer/order/view}" target="iframe">
+                            <i class="fa fa-list-alt"></i> <span>我的订单</span>
+                        </a>
+                    </li>
 
-                <li sec:authorize="hasAuthority('ROLE_ADMIN')">
-                    <a th:href="@{/consumer/account/manage}" target="iframe">
-                        <i class="fa fa-users"></i>账号管理
-                    </a>
-                </li>
-            </ul>
-        </section>
+                    <li sec:authorize="hasAnyAuthority('ROLE_COMMON','ROLE_ADMIN')">
+                        <a th:href="@{/borrow/list}" target="iframe">
+                            <i class="fa fa-bookmark"></i> <span>我的借阅</span>
+                        </a>
+                    </li>
+
+                    <li sec:authorize="hasAuthority('ROLE_ADMIN')">
+                        <a th:href="@{/book/admin/manag}" target="iframe">
+                            <i class="fa fa-edit"></i> <span>图书管理</span>
+                        </a>
+                    </li>
+                    <li sec:authorize="hasAnyAuthority('ROLE_COMMON','ROLE_ADMIN')">
+                        <a th:href="@{/consumer/account/reset}" target="iframe">
+                            <i class="fa fa-key"></i> <span>修改密码</span>
+                        </a>
+                    </li>
+
+                    <li sec:authorize="hasAuthority('ROLE_ADMIN')">
+                        <a th:href="@{/consumer/account/manage}" target="iframe">
+                            <i class="fa fa-users"></i> <span>账号管理</span>
+                        </a>
+                    </li>
+                </ul>
+            </section>
+        </aside>
     </aside>
     <div class="content-wrapper">
         <iframe width="100%" id="iframe" name="iframe" onload="SetIFrameHeight()" frameborder="0" ></iframe>

@@ -1,5 +1,6 @@
 package com.test.controller;
 
+// ... imports 保持不变 ...
 import com.test.pojo.EBook;
 import com.test.pojo.Order;
 import com.test.pojo.UserDto;
@@ -28,13 +29,10 @@ public class BorrowWebController {
 
     @Autowired
     private RemoteOrderService remoteOrderService;
-
     @Autowired
     private RemoteReturnService remoteReturnService;
-
     @Autowired
     private LoginService loginService;
-
     @Autowired
     private BookService bookService;
 
@@ -68,8 +66,6 @@ public class BorrowWebController {
             }
         }
 
-        // 筛选出 "借阅" 类型的订单 (这里假设 price <= 0 为借阅)
-        // 并且填充书籍和用户信息
         List<Order> borrowOrders = new ArrayList<>();
         if (allOrders != null) {
             for (Order order : allOrders) {
@@ -82,12 +78,19 @@ public class BorrowWebController {
                         EBook book = bookService.getBookById(order.getBookId().intValue());
                         if (book != null) order.setBookName(book.getName());
                     }
-                    // 填充用户名
+
+                    // [修改核心]：填充用户名 (改为调用 getUserById 获取 UserDto)
                     if (order.getUserId() != null) {
                         try {
-                            List<String> userInfos = loginService.findUserByUserId(order.getUserId().intValue());
-                            if (userInfos != null && !userInfos.isEmpty()) order.setUserName(userInfos.get(0));
-                        } catch (Exception e) {}
+                            UserDto u = loginService.getUserById(order.getUserId().intValue());
+                            if (u != null) {
+                                order.setUserName(u.getUsername()); // 获取真正的用户名
+                            } else {
+                                order.setUserName("未知用户");
+                            }
+                        } catch (Exception e) {
+                            order.setUserName("用户查询失败");
+                        }
                     }
                     borrowOrders.add(order);
                 }
@@ -102,7 +105,6 @@ public class BorrowWebController {
     // 处理归还动作
     @GetMapping("/returnBook/{orderId}")
     public String returnBook(@PathVariable("orderId") Long orderId) {
-        // 调用归还微服务
         remoteReturnService.returnBook(orderId);
         return "redirect:/borrow/list";
     }

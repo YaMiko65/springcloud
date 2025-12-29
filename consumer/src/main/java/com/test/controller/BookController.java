@@ -2,15 +2,23 @@ package com.test.controller;
 
 import com.test.pojo.EBook;
 import com.test.pojo.Inventory;
+import com.test.pojo.Order;
+import com.test.pojo.UserDto;
 import com.test.service.BookService;
+import com.test.service.LoginService;
 import com.test.service.RemoteInventoryService;
+import com.test.service.RemoteOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -21,7 +29,14 @@ public class BookController {
     private BookService bookService;
 
     @Autowired
-    private RemoteInventoryService inventoryService; // 注入库存服务
+    private RemoteInventoryService inventoryService;
+
+    // 【新增】注入订单服务和登录服务
+    @Autowired
+    private RemoteOrderService remoteOrderService;
+
+    @Autowired
+    private LoginService loginService;
 
     // --- 辅助方法：填充库存信息 ---
     private void populateStock(List<EBook> books) {
@@ -29,15 +44,13 @@ public class BookController {
 
         for (EBook book : books) {
             try {
-                // 调用远程服务查询库存
                 Inventory inv = inventoryService.getStockByBookId(book.getId());
                 if (inv != null && inv.getStock() != null) {
                     book.setStock(inv.getStock());
                 } else {
-                    book.setStock(0); // 查不到默认0
+                    book.setStock(0);
                 }
             } catch (Exception e) {
-                // 捕获异常，防止库存服务挂掉导致整个页面无法访问
                 System.err.println("查询库存失败 bookId=" + book.getId() + ": " + e.getMessage());
                 book.setStock(0);
             }
@@ -48,7 +61,7 @@ public class BookController {
     @RequestMapping("/list")
     public String findAllBooks(Model model) {
         List<EBook> books = bookService.findAllBooks();
-        populateStock(books); // 填充库存
+        populateStock(books);
         model.addAttribute("books", books);
         return "book_list";
     }
@@ -57,25 +70,53 @@ public class BookController {
     @RequestMapping("/search")
     public String searchBooks(EBook book, Model model) {
         List<EBook> books = bookService.searchBook(book);
-        populateStock(books); // 填充库存
+        populateStock(books);
         model.addAttribute("books", books);
         return "book_list";
     }
 
-    // [修改] 借阅图书，增加数量参数
+    // [修改] 借阅图书
     @RequestMapping("/find/{id}")
     public String updateBook(@PathVariable("id") Integer id,
                              @RequestParam(value = "count", defaultValue = "1") Integer count) {
-        // 调用库存服务扣减库存
+
+        // 1. 获取当前登录用户
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/loginview";
+        }
+        String username = authentication.getName();
+        UserDto user = loginService.getUserByUsername(username);
+        if (user == null) {
+            return "redirect:/loginview";
+        }
+
+        // 2. 调用库存服务扣减库存
         boolean success = inventoryService.decreaseStock(id, count);
 
         if (success) {
-            // 扣减成功，代表借阅成功。
-            // 注意：这里不再将图书状态改为"1"(借阅中)，只要还有库存，其他人就能继续借阅。
-            // 如果业务需求是借阅一次库存-1，此处逻辑已满足。
-            System.out.println("借阅成功，图书ID: " + id + ", 数量: " + count);
+            // 3. 【新增逻辑】库存扣减成功，创建借阅订单
+            try {
+                Order order = new Order();
+                order.setUserId(Long.valueOf(user.getId())); // 设置用户ID
+                order.setBookId(Long.valueOf(id));           // 设置图书ID
+                order.setCount(count);
+
+                // 关键：借阅订单价格设为0，状态设为0（借阅中）
+                order.setPrice(BigDecimal.ZERO);
+                order.setTotalPrice(BigDecimal.ZERO);
+                order.setStatus(0);
+                order.setCreateTime(new Date());
+
+                // 调用远程订单服务保存
+                remoteOrderService.createOrder(order);
+
+                System.out.println("借阅成功，订单已创建。图书ID: " + id);
+            } catch (Exception e) {
+                System.err.println("借阅订单创建失败: " + e.getMessage());
+                // 实际生产中可能需要回滚库存，此处暂略
+            }
         } else {
-            // 扣减失败（库存不足），可以添加错误处理逻辑
             System.out.println("借阅失败，库存不足，图书ID: " + id);
         }
 

@@ -25,6 +25,16 @@ public class LoginDao {
         return null;
     }
 
+    // [新增] 根据ID获取用户对象
+    public UserDto getUserById(Integer id) {
+        String sql = "select * from user where id = ?";
+        List<UserDto> list = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(UserDto.class), id);
+        if (list != null && list.size() == 1) {
+            return list.get(0);
+        }
+        return null;
+    }
+
     public List<String> findUserByUserId(Integer userId) {
         String sql = "select * from user u,priv p,user_priv up where up.user_id=u.id and up.priv_id=p.id and u.id=?";
         List<Privileda> list = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Privileda.class), userId);
@@ -33,5 +43,4 @@ public class LoginDao {
         list.forEach(p -> privilegeArray.add(p.getAuthority()));
         return privilegeArray;
     }
-
 }

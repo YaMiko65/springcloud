@@ -6,12 +6,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
-// [修改处] 增加 url 属性，强制指向本地 8003 端口
+// 确保 name 和 url 配置正确
 @FeignClient(name = "loginProvider", url = "http://localhost:8003")
 public interface LoginService {
 
     @RequestMapping("/getUserByUsername/{username}")
     public UserDto getUserByUsername(@PathVariable("username") String username);
+
+    // [新增] 对应 Provider 的接口
+    @RequestMapping("/getUserById/{id}")
+    public UserDto getUserById(@PathVariable("id") Integer id);
 
     @RequestMapping("/findUserByUserId/{userId}")
     public List<String> findUserByUserId(@PathVariable("userId") Integer userId);
